@@ -499,19 +499,45 @@
 
         // Parse the DMA mapping text
         function parseDMAMapping(text) {
-            const lines = text.split('\n');
+            const lines = text.split(/\r?\n/);  // Handle both Windows and Unix line endings
             dmaMapping = {};
+            let successCount = 0;
             
-            for (let i = 1; i < lines.length; i++) {
-                const parts = lines[i].split('\t');
+            for (let i = 0; i < lines.length; i++) {
+                // Skip header row and empty lines
+                if (i === 0 || !lines[i].trim()) continue;
+                
+                // Try both tab and comma as delimiters
+                let parts = lines[i].split('\t');
+                if (parts.length < 3) {
+                    parts = lines[i].split(',');
+                }
+                
                 if (parts.length >= 3) {
                     const zipCode = parts[0].trim();
                     const dmaName = parts[2].trim();
-                    if (zipCode && dmaName) {
+                    
+                    if (zipCode && dmaName && zipCode.match(/^\d+$/)) {  // Only process numeric zip codes
+                        // Store the zip code as provided
                         dmaMapping[zipCode] = dmaName;
+                        successCount++;
+                        
+                        // If the zip code is 4 digits or less, also store with leading zeros
+                        if (zipCode.length < 5) {
+                            const paddedZip = zipCode.padStart(5, '0');
+                            dmaMapping[paddedZip] = dmaName;
+                        }
+                        
+                        // If the zip code has 5 digits starting with 0, also store without leading zeros
+                        if (zipCode.length === 5 && zipCode.startsWith('0')) {
+                            const unpaddedZip = parseInt(zipCode, 10).toString();
+                            dmaMapping[unpaddedZip] = dmaName;
+                        }
                     }
                 }
             }
+            
+            console.log(`Successfully parsed ${successCount} zip codes from ${lines.length} total lines`);
         }
 
         // Fallback embedded mapping (partial - includes major cities)
@@ -825,3 +851,4 @@
 </body>
 
 </html>
+
