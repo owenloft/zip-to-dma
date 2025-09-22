@@ -5,7 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeoLift Data Processor - Shopify to DMA Converter</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-main: #f8f9fc;
+            --bg-card: #ffffff;
+            --text-heading: #1a202c;
+            --text-body: #4a5568;
+            --text-muted: #718096;
+            --border-color: #e2e8f0;
+            --primary: #5A46E5;
+            --primary-hover: #4C3CD6;
+            --accent-yellow: #FBBF24;
+            --success-bg: #e6f7f0;
+            --success-text: #047857;
+            --success-border: #6ee7b7;
+            --error-bg: #fef2f2;
+            --error-text: #b91c1c;
+            --error-border: #fca5a5;
+            --info-bg: #eff6ff;
+            --info-text: #1e40af;
+            --info-border: #93c5fd;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,80 +37,118 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-body);
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            margin: 2rem auto;
+            background: var(--bg-card);
+            border-radius: 1.5rem; /* 24px */
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);
             overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
+            padding: 3rem 2.5rem;
             text-align: center;
+            background: linear-gradient(135deg, #2b3a67 0%, #1a202c 100%);
+        }
+        
+        .header img {
+            height: 40px;
+            margin-bottom: 1rem;
         }
 
         .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2.25rem;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
 
         .header p {
-            opacity: 0.9;
-            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.125rem;
         }
 
         .content {
-            padding: 40px;
+            padding: 2.5rem;
         }
 
         .step {
-            margin-bottom: 40px;
-            padding: 25px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            background: #f8fafc;
+            margin-bottom: 2.5rem;
         }
 
         .step-header {
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
 
         .step-number {
             width: 40px;
             height: 40px;
-            background: #667eea;
+            background: var(--primary);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            margin-right: 15px;
+            margin-right: 1rem;
             font-size: 1.2rem;
+            flex-shrink: 0;
         }
 
         .step-title {
-            font-size: 1.4rem;
-            color: #2d3748;
-            font-weight: 600;
+            font-size: 1.5rem;
+            color: var(--text-heading);
+            font-weight: 700;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
         }
 
+        .tab-button {
+            padding: 0.75rem 1rem;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+            transform: translateY(1px);
+        }
+        
+        .tab-button:hover {
+            color: var(--primary);
+            background-color: var(--info-bg);
+        }
+
+        .tab-button.active {
+            color: var(--primary);
+            font-weight: 700;
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
         .file-input-wrapper {
             position: relative;
-            display: inline-block;
-            cursor: pointer;
             width: 100%;
         }
 
@@ -100,70 +162,70 @@
 
         .file-input-label {
             display: block;
-            padding: 15px 25px;
-            background: #667eea;
-            color: white;
-            border-radius: 8px;
+            padding: 3rem 1.5rem;
+            border: 2px dashed var(--border-color);
+            background: var(--bg-main);
+            color: var(--text-muted);
+            border-radius: 12px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 500;
             transition: all 0.3s;
             cursor: pointer;
         }
-
+        
         .file-input-label:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: var(--info-bg);
+        }
+        .file-input-label::before {
+             content: '📤';
+             display: block;
+             font-size: 2rem;
+             margin-bottom: 0.5rem;
         }
 
+
         .button {
-            padding: 12px 30px;
-            background: #48bb78;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
             color: white;
             border: none;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .button:hover {
-            background: #38a169;
+            background: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(72, 187, 120, 0.4);
+            box-shadow: 0 4px 12px rgba(90, 70, 229, 0.2);
         }
 
         .button:disabled {
             background: #cbd5e0;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
         }
-
+        
         .status {
-            margin-top: 15px;
-            padding: 12px;
+            margin-top: 1.5rem;
+            padding: 1rem;
             border-radius: 8px;
             font-weight: 500;
+            border-width: 1px;
+            border-style: solid;
         }
 
-        .status.success {
-            background: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
-        }
-
-        .status.error {
-            background: #fed7d7;
-            color: #742a2a;
-            border: 1px solid #fc8181;
-        }
-
-        .status.info {
-            background: #bee3f8;
-            color: #2c5282;
-            border: 1px solid #90cdf4;
-        }
+        .status.success { background: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
+        .status.error { background: var(--error-bg); color: var(--error-text); border-color: var(--error-border); }
+        .status.info { background: var(--info-bg); color: var(--info-text); border-color: var(--info-border); }
 
         .preview-table {
             width: 100%;
@@ -173,216 +235,178 @@
         }
 
         .preview-table th {
-            background: #667eea;
-            color: white;
-            padding: 12px;
+            background: var(--bg-main);
+            color: var(--text-muted);
+            padding: 12px 15px;
             text-align: left;
-            font-weight: 600;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid var(--border-color);
         }
+        
+        .preview-table thead th:first-child { border-top-left-radius: 8px; }
+        .preview-table thead th:last-child { border-top-right-radius: 8px; }
 
         .preview-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .preview-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .preview-table tr:hover {
-            background: #f1f5f9;
+            background: var(--info-bg);
         }
-
+        
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
             margin-top: 20px;
         }
 
         .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-main);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
             text-align: center;
         }
 
         .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
         }
 
         .stat-label {
-            color: #718096;
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
-
-        .download-button {
-            background: #38a169;
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            margin-top: 20px;
-        }
-
-        .hidden {
-            display: none;
-        }
+        
+        .download-button { margin-top: 2rem; width: 100%; justify-content: center; padding: 1rem; font-size: 1.1rem; }
+        .hidden { display: none; }
 
         .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .error-list {
             max-height: 200px;
             overflow-y: auto;
             margin-top: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 4px;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            border: 1px solid var(--error-border);
+        }
+        .error-list li { list-style-type: none; margin-bottom: 5px; font-family: monospace; }
+        .error-list li::before { content: '•'; color: var(--error-text); margin-right: 8px; }
+
+
+        .help-section {
+            background: var(--info-bg);
+            border: 1px solid var(--info-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
             font-size: 0.9rem;
         }
 
-        .error-list li {
-            margin-left: 20px;
-            margin-bottom: 5px;
-        }
-
-        .help-section {
-            background: #edf2ff;
-            border: 1px solid #c3dafe;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
-        }
-
         .help-section h4 {
-            color: #2d3748;
+            color: var(--text-heading);
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .help-section ul {
             margin-left: 20px;
-            color: #4a5568;
+            color: var(--text-body);
         }
 
-        .help-section li {
-            margin-bottom: 5px;
-        }
+        .help-section li { margin-bottom: 5px; }
 
-        .upload-option {
-            margin-bottom: 15px;
-        }
-
+        .upload-option { margin-bottom: 15px; }
         .upload-option label {
             display: block;
-            margin-bottom: 5px;
-            color: #4a5568;
+            margin-bottom: 8px;
+            color: var(--text-body);
             font-weight: 500;
         }
-
-        .upload-option textarea {
+        .upload-option textarea, .upload-option input[type="file"] {
             width: 100%;
-            min-height: 100px;
             padding: 10px;
-            border: 2px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-family: monospace;
             font-size: 0.9rem;
         }
-
+        .upload-option textarea { min-height: 150px; }
         .upload-option textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(90, 70, 229, 0.1);
         }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-button {
-            padding: 10px 20px;
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .tab-button.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
+        .upload-option p { margin-top: 10px; color: var(--text-muted); font-size: 0.9rem; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 GeoLift Data Processor</h1>
+            <img src="https://cdn-igknb.nitrocdn.com/wYVJGoWmUttQFztMHWvcsQtpoPsgPWLn/assets/images/source/rev-89f824a/www.sociummedia.com/wp-content/uploads/2024/04/Socium-Media-Logo-2.svg" alt="Socium Media Logo">
+            <h1>GeoLift Data Processor</h1>
             <p>Convert Shopify order data to GeoLift-ready DMA format</p>
         </div>
         
         <div class="content">
-            <!-- Step 1: Upload File -->
             <div class="step">
                 <div class="step-header">
                     <div class="step-number">1</div>
-                    <div class="step-title">Upload Shopify Data</div>
+                    <div class="step-title">Provide Your Data</div>
                 </div>
                 
                 <div class="tabs">
-                    <button class="tab-button active" onclick="switchTab('file')">Upload CSV File</button>
-                    <button class="tab-button" onclick="switchTab('paste')">Paste Data</button>
-                    <button class="tab-button" onclick="switchTab('mapping')">Custom DMA Mapping</button>
+                    <button class="tab-button active" onclick="switchTab('file', event)">Upload CSV File</button>
+                    <button class="tab-button" onclick="switchTab('paste', event)">Paste Data</button>
+                    <button class="tab-button" onclick="switchTab('mapping', event)">Custom DMA Mapping</button>
                 </div>
 
                 <div id="file-tab" class="tab-content active">
                     <div class="file-input-wrapper">
                         <input type="file" id="fileInput" class="file-input" accept=".csv">
                         <label for="fileInput" class="file-input-label">
-                            Choose CSV File (Day, Billing postal code, Orders)
+                            Choose CSV File <br>
+                            <span style="font-weight: 400; font-size: 0.9rem">(Day, Billing postal code, Orders)</span>
                         </label>
                     </div>
                 </div>
 
                 <div id="paste-tab" class="tab-content">
                     <div class="upload-option">
-                        <label>Paste CSV data below (must include headers):</label>
-                        <textarea id="pasteInput" placeholder="Day,Billing postal code,Orders
-7/1/2024,10001,5
-7/1/2024,90210,3
-..."></textarea>
+                        <label for="pasteInput">Paste CSV data below (must include headers):</label>
+                        <textarea id="pasteInput" placeholder="Day,Billing postal code,Orders&#10;7/1/2024,10001,5&#10;7/1/2024,90210,3&#10;..."></textarea>
                         <button class="button" onclick="processPastedData()" style="margin-top: 10px;">Process Pasted Data</button>
                     </div>
                 </div>
 
                 <div id="mapping-tab" class="tab-content">
                     <div class="upload-option">
-                        <label>Upload Custom ZIP to DMA Mapping (optional):</label>
+                        <label for="mappingInput">Upload Custom ZIP to DMA Mapping (optional):</label>
                         <input type="file" id="mappingInput" accept=".csv,.tsv,.txt">
-                        <p style="margin-top: 10px; color: #718096; font-size: 0.9rem;">
-                            Format: Tab or comma-separated file with zip codes in first column, DMA names in third column
+                        <p>
+                            Format: Tab or comma-separated file with zip codes in first column, DMA names in third column.
                         </p>
                     </div>
                 </div>
@@ -390,19 +414,18 @@
                 <div id="uploadStatus" class="status hidden"></div>
 
                 <div class="help-section">
-                    <h4>📋 Expected Format:</h4>
+                    <h4>📋 Expected Shopify Format:</h4>
                     <ul>
                         <li><strong>Column 1:</strong> Date (MM/DD/YYYY format)</li>
                         <li><strong>Column 2:</strong> Billing postal code (5-digit US zip codes)</li>
                         <li><strong>Column 3:</strong> Order count (number)</li>
                     </ul>
-                    <p style="margin-top: 10px; color: #718096;">
-                        The tool will automatically fix zip codes missing leading zeros and remove dashes.
+                    <p style="margin-top: 10px;">
+                        The tool automatically fixes zip codes missing leading zeros and removes dashes.
                     </p>
                 </div>
             </div>
 
-            <!-- Step 2: Processing Status -->
             <div id="step2" class="step hidden">
                 <div class="step-header">
                     <div class="step-number">2</div>
@@ -410,13 +433,12 @@
                 </div>
                 <div id="processingStatus">
                     <div class="loader"></div>
-                    <p style="text-align: center; color: #718096; margin-top: 10px;">
+                    <p style="text-align: center; color: var(--text-muted); margin-top: 10px;">
                         Converting zip codes to DMAs...
                     </p>
                 </div>
             </div>
 
-            <!-- Step 3: Preview Results -->
             <div id="step3" class="step hidden">
                 <div class="step-header">
                     <div class="step-number">3</div>
@@ -442,26 +464,29 @@
                     </div>
                 </div>
 
-                <div id="warningsSection" class="status error hidden" style="margin-top: 20px;">
-                    <strong>⚠️ Warning: Some zip codes could not be mapped to DMAs</strong>
+                <div id="warningsSection" class="status error hidden" style="margin-top: 2rem;">
+                    <strong>⚠️ Some zip codes could not be mapped to DMAs.</strong>
                     <div id="unmappedList" class="error-list"></div>
                 </div>
 
-                <h3 style="margin-top: 30px; margin-bottom: 15px; color: #2d3748;">Data Preview (First 10 rows)</h3>
-                <table class="preview-table" id="previewTable">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>DMA</th>
-                            <th>Orders</th>
-                        </tr>
-                    </thead>
-                    <tbody id="previewBody">
-                    </tbody>
-                </table>
+                <h3 style="margin-top: 2.5rem; margin-bottom: 1rem; color: var(--text-heading); font-size: 1.25rem; font-weight: 700;">Data Preview (First 10 rows)</h3>
+                <div style="border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                    <table class="preview-table" id="previewTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>DMA</th>
+                                <th>Orders</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody">
+                        </tbody>
+                    </table>
+                </div>
 
                 <button id="downloadBtn" class="button download-button">
-                    📥 Download Processed CSV
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download Processed CSV
                 </button>
             </div>
         </div>
@@ -593,7 +618,7 @@
         });
 
         // Tab switching
-        function switchTab(tab) {
+        function switchTab(tab, event) {
             // Update button states
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -610,6 +635,9 @@
                 alert('Please paste CSV data first');
                 return;
             }
+            
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('step3').classList.add('hidden');
             
             Papa.parse(pastedText, {
                 complete: function(results) {
@@ -672,7 +700,7 @@
 
         function processData(data) {
             const processingStatus = document.getElementById('processingStatus');
-            processingStatus.innerHTML = '<div class="loader"></div><p style="text-align: center; color: #718096; margin-top: 10px;">Converting zip codes to DMAs...</p>';
+            processingStatus.innerHTML = '<div class="loader"></div><p style="text-align: center; color: var(--text-muted); margin-top: 10px;">Converting zip codes to DMAs...</p>';
 
             setTimeout(() => {
                 const unmappedZips = new Set();
@@ -687,7 +715,7 @@
                     if (!dateStr) return;
 
                     // Parse the date (assuming MM/DD/YYYY format from Shopify)
-                    const dateParts = dateStr.split('/');
+                    const dateParts = String(dateStr).split('/');
                     if (dateParts.length === 3) {
                         // Convert to YYYY-MM-DD format
                         const year = dateParts[2];
@@ -697,8 +725,12 @@
                     }
 
                     // Track date range
-                    if (!minDate || dateStr < minDate) minDate = dateStr;
-                    if (!maxDate || dateStr > maxDate) maxDate = dateStr;
+                    const currentDateObj = new Date(dateStr);
+                    if (!isNaN(currentDateObj)) {
+                        if (!minDate || currentDateObj < minDate) minDate = currentDateObj;
+                        if (!maxDate || currentDateObj > maxDate) maxDate = currentDateObj;
+                    }
+
 
                     // Get and fix the zip code
                     let zipCode = row['Billing postal code'] || row['Billing Postal Code'] || 
@@ -707,7 +739,7 @@
                     zipCode = fixZipCode(zipCode);
 
                     if (!zipCode) {
-                        unmappedZips.add('Empty zip code');
+                        unmappedZips.add('Empty/Invalid');
                         return;
                     }
 
@@ -719,7 +751,7 @@
                     }
 
                     // Get orders count
-                    const orders = parseInt(row['Orders'] || row['orders'] || row['Order Count'] || 0) || 0;
+                    const orders = Number(row['Orders'] || row['orders'] || row['Order Count'] || 0) || 0;
 
                     // Initialize nested structure if needed
                     if (!dateOrdersByDMA[dateStr]) {
@@ -732,6 +764,14 @@
                     }
                     dateOrdersByDMA[dateStr][dma] += orders;
                 });
+
+                if (!minDate || !maxDate) {
+                    document.getElementById('step2').classList.add('hidden');
+                    const uploadStatus = document.getElementById('uploadStatus');
+                    uploadStatus.className = 'status error';
+                    uploadStatus.textContent = '❌ Error: Could not parse dates. Please ensure dates are in MM/DD/YYYY format.';
+                    return;
+                }
 
                 // Get all unique dates and DMAs
                 const allDates = [];
@@ -747,6 +787,14 @@
                 Object.values(dateOrdersByDMA).forEach(dmaData => {
                     Object.keys(dmaData).forEach(dma => allDMAs.add(dma));
                 });
+                
+                if (allDMAs.size === 0) {
+                     document.getElementById('step2').classList.add('hidden');
+                    const uploadStatus = document.getElementById('uploadStatus');
+                    uploadStatus.className = 'status error';
+                    uploadStatus.textContent = '❌ Error: No valid DMAs could be mapped. Check your zip codes and mapping file.';
+                    return;
+                }
 
                 // Create complete dataset with zeros for missing combinations
                 processedData = [];
@@ -769,7 +817,7 @@
 
                 // Update UI
                 displayResults(processedData, unmappedZips, minDate, maxDate);
-            }, 100);
+            }, 500); // Simulate processing time
         }
 
         function displayResults(data, unmappedZips, minDate, maxDate) {
@@ -783,9 +831,8 @@
             document.getElementById('uniqueDMAs').textContent = uniqueDMAs.size;
             
             // Format date range
-            const formatDate = (dateStr) => {
-                const date = new Date(dateStr);
-                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const formatDate = (dateObj) => {
+                return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
             };
             document.getElementById('dateRange').textContent = `${formatDate(minDate)} - ${formatDate(maxDate)}`;
             
@@ -849,7 +896,4 @@
         });
     </script>
 </body>
-
 </html>
-
-
